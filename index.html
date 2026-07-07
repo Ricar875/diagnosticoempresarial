@@ -1,1 +1,1630 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diagnóstico Empresarial AI | Digital Chevalier Card</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+/* ============================================================
+   CONFIG — paleta: verde-escuro / bege / dourado
+   ============================================================ */
+:root{
+  --forest-0:#081712;
+  --forest-1:#0d2318;
+  --forest-2:#1e4632;
+  --panel:#0f261b;
+  --line:rgba(201,162,74,0.22);
+  --gold:#c9a24a;
+  --gold-light:#e6c878;
+  --gold-deep:#9c7a2e;
+  --beige:#ede4d2;
+  --beige-dim:#c7bda3;
+  --text:#f4efe1;
+  --text-dim:#a79f8a;
+  --danger:#c1553f;
+  --warn:#c9a24a;
+  --ok:#7fa06a;
+}
+
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--forest-0);
+  color:var(--text);
+  font-family:'Inter',system-ui,-apple-system,sans-serif;
+  min-height:100vh;
+  position:relative;
+  overflow-x:hidden;
+}
+h1,h2,h3,.display{font-family:'Fraunces',Georgia,serif;}
+
+/* elegant background texture */
+.circuit-bg{
+  position:fixed; inset:0; z-index:0; pointer-events:none;
+  background:
+    radial-gradient(ellipse 900px 550px at 12% -8%, rgba(201,162,74,0.10), transparent 60%),
+    radial-gradient(ellipse 700px 600px at 105% 15%, rgba(201,162,74,0.06), transparent 60%),
+    linear-gradient(180deg, var(--forest-0), #0b1f16 45%, var(--forest-0));
+}
+.circuit-bg::before{
+  content:'';
+  position:absolute; inset:0;
+  background-image: repeating-linear-gradient(135deg, var(--line) 0px, var(--line) 1px, transparent 1px, transparent 64px);
+  mask-image:radial-gradient(ellipse 1200px 800px at 50% 0%, black, transparent 72%);
+  opacity:.6;
+}
+
+.wrap{position:relative;z-index:1;max-width:760px;margin:0 auto;padding:0 20px 80px;}
+
+/* ---------- header / hero ---------- */
+header{padding:38px 0 26px;text-align:center;}
+.eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--gold-light);border:1px solid var(--line);
+  padding:6px 14px;border-radius:2px;background:rgba(201,162,74,.06);
+  margin-bottom:22px;font-weight:600;
+}
+.eyebrow::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--gold);box-shadow:0 0 8px var(--gold);}
+h1{
+  font-size:clamp(26px,6vw,38px);
+  font-weight:600;
+  line-height:1.2;
+  letter-spacing:-0.01em;
+  color:var(--beige);
+}
+h1 .accent{color:var(--gold-light);font-style:italic;}
+.sub{
+  color:var(--text-dim);
+  font-size:15px;
+  max-width:520px;
+  margin:16px auto 0;
+  line-height:1.6;
+}
+
+/* ---------- cards / panels ---------- */
+.panel{
+  background:linear-gradient(180deg, rgba(15,38,27,.92), rgba(8,23,18,.92));
+  border:1px solid var(--line);
+  border-radius:6px;
+  padding:26px 22px;
+  margin-top:22px;
+  box-shadow:0 20px 50px -20px rgba(0,0,0,.7);
+}
+
+label{
+  display:block;font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--gold-light);margin-bottom:8px;font-weight:600;
+}
+.field{margin-bottom:20px;}
+input[type=text], select, textarea{
+  width:100%;background:var(--forest-0);border:1px solid rgba(237,228,210,.14);
+  color:var(--text);padding:13px 14px;border-radius:4px;font-size:15px;
+  font-family:inherit;transition:border-color .2s, box-shadow .2s;
+}
+input[type=text]:focus, select:focus, textarea:focus{
+  outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,162,74,.15);
+}
+textarea{resize:vertical;min-height:90px;line-height:1.5;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+@media(max-width:520px){.grid2{grid-template-columns:1fr;}}
+
+.chip-row{display:flex;gap:10px;flex-wrap:wrap;}
+.chip{
+  flex:1;min-width:120px;text-align:center;padding:12px 10px;border-radius:4px;
+  border:1px solid rgba(237,228,210,.16);cursor:pointer;font-size:14px;font-weight:600;
+  color:var(--text-dim);transition:all .15s;background:var(--forest-0);
+}
+.chip.active{border-color:var(--gold);color:var(--gold-light);background:rgba(201,162,74,.08);box-shadow:0 0 0 1px var(--gold) inset;}
+
+.btn{
+  appearance:none;border:none;cursor:pointer;font-family:'Inter',sans-serif;
+  width:100%;padding:16px;border-radius:4px;font-size:15px;font-weight:700;
+  letter-spacing:.02em;display:flex;align-items:center;justify-content:center;gap:10px;
+  transition:transform .12s, box-shadow .2s;
+}
+.btn:active{transform:scale(.98);}
+.btn-primary{
+  background:linear-gradient(135deg, var(--gold-light), var(--gold-deep));
+  color:#16130a;box-shadow:0 12px 30px -10px rgba(201,162,74,.5);
+}
+.btn-primary:disabled{opacity:.55;cursor:not-allowed;}
+.btn-ghost{
+  background:transparent;border:1px solid rgba(237,228,210,.2);color:var(--beige);
+  margin-top:12px;
+}
+.btn-whats{
+  background:linear-gradient(135deg,#25D366,#128C4A);color:#06210f;
+}
+
+/* ---------- loading / scan ---------- */
+.scan-wrap{text-align:center;padding:50px 10px;}
+.scan-ring{
+  width:96px;height:96px;margin:0 auto 26px;position:relative;
+}
+.scan-ring::before, .scan-ring::after{
+  content:'';position:absolute;inset:0;border-radius:50%;
+  border:2px solid transparent;
+}
+.scan-ring::before{
+  border-top-color:var(--gold);border-right-color:var(--beige-dim);
+  animation:spin 1.1s linear infinite;
+}
+.scan-ring::after{
+  inset:14px;border-top-color:var(--beige-dim);border-left-color:var(--gold);
+  animation:spin 1.6s linear infinite reverse;
+}
+@keyframes spin{to{transform:rotate(360deg);}}
+.scan-text{color:var(--text-dim);font-size:14px;min-height:20px;}
+.scan-title{font-weight:600;font-size:17px;margin-bottom:8px;font-family:'Fraunces',serif;}
+
+/* ---------- score gauge ---------- */
+.score-wrap{display:flex;align-items:center;gap:22px;flex-wrap:wrap;justify-content:center;text-align:left;}
+.score-ring{
+  width:132px;height:132px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;position:relative;
+  background:conic-gradient(var(--gold) calc(var(--pct)*1%), rgba(237,228,210,.08) 0);
+}
+.score-ring::before{
+  content:'';position:absolute;inset:9px;border-radius:50%;background:var(--panel);
+}
+.score-inner{position:relative;z-index:1;text-align:center;}
+.score-num{font-family:'Fraunces',serif;font-size:30px;font-weight:600;color:var(--gold-light);line-height:1;}
+.score-max{font-size:11px;color:var(--text-dim);margin-top:2px;}
+.score-label{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold-light);margin-top:6px;font-weight:600;}
+
+.idx-list{flex:1;min-width:200px;}
+.idx-row{margin-bottom:10px;}
+.idx-top{display:flex;justify-content:space-between;font-size:12.5px;color:var(--text-dim);margin-bottom:4px;}
+.idx-top b{color:var(--beige);font-weight:600;}
+.idx-bar{height:6px;border-radius:3px;background:rgba(237,228,210,.1);overflow:hidden;}
+.idx-fill{height:100%;background:linear-gradient(90deg,var(--gold-deep),var(--gold-light));border-radius:3px;}
+
+/* ---------- results ---------- */
+.badge{
+  display:inline-block;font-size:11px;font-weight:700;letter-spacing:.04em;
+  padding:4px 10px;border-radius:2px;text-transform:uppercase;
+}
+.badge-alta{background:rgba(193,85,63,.15);color:#e0846f;border:1px solid rgba(193,85,63,.4);}
+.badge-media{background:rgba(201,162,74,.15);color:var(--gold-light);border:1px solid rgba(201,162,74,.4);}
+.badge-baixa{background:rgba(127,160,106,.15);color:var(--ok);border:1px solid rgba(127,160,106,.4);}
+
+.area-card{
+  border:1px solid rgba(237,228,210,.1);border-radius:6px;padding:18px;margin-top:14px;
+  background:rgba(237,228,210,.02);
+}
+.area-card h3{font-size:16px;margin:10px 0 6px;color:var(--gold-light);font-weight:600;}
+.area-card p{font-size:14px;line-height:1.55;color:var(--text);margin-bottom:8px;}
+.area-meta{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--text-dim);margin-top:10px;}
+.area-meta span{display:flex;align-items:center;gap:5px;}
+
+.qw-list{list-style:none;margin-top:10px;}
+.qw-list li{
+  display:flex;gap:10px;padding:10px 0;border-bottom:1px dashed rgba(237,228,210,.1);
+  font-size:14px;line-height:1.5;
+}
+.qw-list li:last-child{border-bottom:none;}
+.qw-num{
+  flex-shrink:0;width:22px;height:22px;border-radius:3px;background:rgba(201,162,74,.12);
+  border:1px solid rgba(201,162,74,.4);color:var(--gold-light);font-size:12px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+}
+
+.section-label{
+  font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-light);
+  font-weight:700;margin:26px 0 4px;
+}
+
+/* ---------- plano 30/60/90 ---------- */
+.plan-cols{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:14px;}
+@media(max-width:640px){.plan-cols{grid-template-columns:1fr;}}
+.plan-col{border:1px solid var(--line);border-radius:6px;padding:16px;background:rgba(237,228,210,.02);}
+.plan-col h4{font-family:'Fraunces',serif;color:var(--gold-light);font-size:15px;font-weight:600;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--line);}
+.plan-col ul{list-style:none;}
+.plan-col li{font-size:13px;line-height:1.5;color:var(--text);padding:6px 0;display:flex;gap:8px;}
+.plan-col li::before{content:'—';color:var(--gold);flex-shrink:0;}
+
+/* ---------- setores ---------- */
+.setor-card{
+  border:1px solid rgba(237,228,210,.1);border-radius:6px;padding:16px 18px;margin-top:10px;
+  background:rgba(237,228,210,.02);
+}
+.setor-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:10px;}
+.setor-top h4{font-family:'Fraunces',serif;font-size:15px;font-weight:600;color:var(--gold-light);}
+.setor-nota{font-size:13px;font-weight:700;color:var(--beige);background:rgba(201,162,74,.12);border:1px solid var(--line);padding:3px 10px;border-radius:100px;flex-shrink:0;}
+.setor-card p{font-size:13.5px;line-height:1.55;color:var(--text);margin-bottom:6px;}
+.setor-card .gargalo{font-size:13px;color:var(--text-dim);border-top:1px dashed rgba(237,228,210,.1);padding-top:8px;margin-top:8px;}
+.setor-card .gargalo b{color:#e0846f;}
+
+.err{
+  background:rgba(193,85,63,.1);border:1px solid rgba(193,85,63,.35);color:#e8a898;
+  padding:14px;border-radius:4px;font-size:13.5px;margin-top:16px;line-height:1.5;
+}
+
+.footer-note{text-align:center;color:var(--text-dim);font-size:12px;margin-top:30px;line-height:1.7;}
+.footer-note b{color:var(--gold-light);}
+
+.hidden{display:none !important;}
+</style>
+</head>
+<body>
+
+<div class="circuit-bg"></div>
+
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">Diagnóstico Empresarial AI</div>
+    <h1>Sua empresa está perdendo clientes por falta de <span class="accent">inovação</span>?</h1>
+    <p class="sub">Um agente de análise objetivo avalia sua empresa e entrega, em minutos, o score empresarial, as áreas de impacto imediato e um plano de ação de 30/60/90 dias.</p>
+  </header>
+
+  <!-- ============ FORM ============ -->
+  <div class="panel" id="formPanel">
+    <div class="field">
+      <label>Nome da empresa</label>
+      <input type="text" id="nomeEmpresa" placeholder="Ex: Bazar da Bolinha">
+    </div>
+
+    <div class="field grid2">
+      <div>
+        <label>Setor / segmento</label>
+        <select id="setor">
+          <option value="">Selecione</option>
+          <option>Varejo / loja física</option>
+          <option>E-commerce</option>
+          <option>Serviços (geral)</option>
+          <option>Alimentação / restaurante</option>
+          <option>Saúde / clínica</option>
+          <option>Educação</option>
+          <option>Construção / imóveis</option>
+          <option>Indústria</option>
+          <option>Tecnologia</option>
+          <option>Agronegócio</option>
+          <option>Beleza / estética</option>
+          <option>Autopeças / oficina</option>
+          <option>Outro</option>
+        </select>
+      </div>
+      <div>
+        <label>Estado (UF)</label>
+        <select id="uf"></select>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Cidade</label>
+      <input type="text" id="cidade" placeholder="Ex: Paulo Afonso">
+    </div>
+
+    <div class="field">
+      <label>Porte da empresa</label>
+      <div class="chip-row" id="porteChips">
+        <div class="chip" data-v="Pequeno porte (até 19 funcionários)">Pequeno porte</div>
+        <div class="chip" data-v="Médio porte (20–100 funcionários)">Médio porte</div>
+        <div class="chip" data-v="Grande porte (100+ funcionários)">Grande porte</div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Principais dores hoje (opcional, mas melhora muito a análise)</label>
+      <textarea id="dores" placeholder="Ex: concorrência forte, atendimento lento, pouca presença digital, equipe resistente a mudanças..."></textarea>
+    </div>
+
+    <button class="btn btn-primary" id="btnAnalisar">
+      Iniciar análise de inovação
+    </button>
+    <div id="formErr"></div>
+  </div>
+
+  <!-- ============ LOADING ============ -->
+  <div class="panel hidden" id="loadingPanel">
+    <div class="scan-wrap">
+      <div class="scan-ring"></div>
+      <div class="scan-title">Analisando sua empresa…</div>
+      <div class="scan-text" id="scanMsg">Cruzando setor, porte e contexto regional</div>
+    </div>
+  </div>
+
+  <!-- ============ RESULTS ============ -->
+  <div class="hidden" id="resultsPanel">
+    <div class="panel" id="scoreBox"></div>
+
+    <div class="panel" id="resumoBox"></div>
+
+    <div class="section-label">Diagnóstico por setor</div>
+    <div id="setoresBox"></div>
+
+    <div class="section-label">Áreas de impacto imediato</div>
+    <div id="areasBox"></div>
+
+    <div class="section-label">Plano de ação · 30 / 60 / 90 dias</div>
+    <div id="planBox"></div>
+
+    <div class="panel" id="quickWinsBox" style="margin-top:26px;"></div>
+
+    <button class="btn btn-primary" id="btnWhats" style="margin-top:26px;background:linear-gradient(135deg,#25D366,#128C4A);color:#06210f;">
+      Falar com um consultor agora
+    </button>
+    <button class="btn btn-ghost" id="btnPdf">Baixar diagnóstico em PDF</button>
+    <button class="btn btn-ghost" id="btnNova">Fazer nova análise</button>
+  </div>
+
+  <div class="footer-note">
+    Análise gerada por agente de IA · <b>Digital Chevalier Card</b><br>
+    Consultoria em inovação e transformação digital para empresas em todo o Brasil
+  </div>
+
+</div>
+
+<script>
+/* ============================================================
+   CONFIG
+   ============================================================ */
+const CONFIG = {
+  agencyName: "Digital Chevalier Card",
+  whatsappNumber: "5575991771095", // (75) 99177-1095
+  model: "claude-sonnet-4-6",
+  // Troque pela URL do seu Worker depois do deploy no Cloudflare
+  apiEndpoint: "https://diagnostico-ia-proxy.SEU-SUBDOMINIO.workers.dev"
+};
+
+/* ---------- UF / Região map ---------- */
+const UF_REGIAO = {
+  AC:"Norte", AP:"Norte", AM:"Norte", PA:"Norte", RO:"Norte", RR:"Norte", TO:"Norte",
+  AL:"Nordeste", BA:"Nordeste", CE:"Nordeste", MA:"Nordeste", PB:"Nordeste", PE:"Nordeste",
+  PI:"Nordeste", RN:"Nordeste", SE:"Nordeste",
+  DF:"Centro-Oeste", GO:"Centro-Oeste", MT:"Centro-Oeste", MS:"Centro-Oeste",
+  ES:"Sudeste", MG:"Sudeste", RJ:"Sudeste", SP:"Sudeste",
+  PR:"Sul", RS:"Sul", SC:"Sul"
+};
+const ufSelect = document.getElementById('uf');
+Object.keys(UF_REGIAO).sort().forEach(uf=>{
+  const opt = document.createElement('option');
+  opt.value = uf; opt.textContent = uf;
+  ufSelect.appendChild(opt);
+});
+
+/* ---------- porte chips ---------- */
+let porteSelecionado = "";
+document.querySelectorAll('#porteChips .chip').forEach(chip=>{
+  chip.addEventListener('click', ()=>{
+    document.querySelectorAll('#porteChips .chip').forEach(c=>c.classList.remove('active'));
+    chip.classList.add('active');
+    porteSelecionado = chip.dataset.v;
+  });
+});
+
+/* ---------- scan messages rotation ---------- */
+const scanMsgs = [
+  "Cruzando setor, porte e contexto regional",
+  "Mapeando padrões de mercado da sua cidade",
+  "Calculando score empresarial",
+  "Identificando áreas de maior impacto imediato",
+  "Montando o plano de ação de 30, 60 e 90 dias"
+];
+let scanInterval;
+
+function setScanMsg(){
+  const el = document.getElementById('scanMsg');
+  let i = 0;
+  el.textContent = scanMsgs[0];
+  scanInterval = setInterval(()=>{
+    i = (i+1) % scanMsgs.length;
+    el.textContent = scanMsgs[i];
+  }, 1400);
+}
+
+/* ---------- main flow ---------- */
+document.getElementById('btnAnalisar').addEventListener('click', async ()=>{
+  const nomeEmpresa = document.getElementById('nomeEmpresa').value.trim();
+  const setor = document.getElementById('setor').value;
+  const uf = ufSelect.value;
+  const cidade = document.getElementById('cidade').value.trim();
+  const dores = document.getElementById('dores').value.trim();
+  const errBox = document.getElementById('formErr');
+  errBox.innerHTML = "";
+
+  if(!nomeEmpresa || !setor || !uf || !cidade || !porteSelecionado){
+    errBox.innerHTML = '<div class="err">Preencha nome, setor, estado, cidade e porte da empresa para continuar.</div>';
+    return;
+  }
+
+  document.getElementById('formPanel').classList.add('hidden');
+  document.getElementById('loadingPanel').classList.remove('hidden');
+  setScanMsg();
+
+  const regiao = UF_REGIAO[uf];
+
+  const systemPrompt = `Você é um consultor sênior de inovação empresarial brasileiro, com décadas de experiência assessorando empresas de médio e grande porte em capitais e municípios do interior, nas cinco regiões do Brasil (Norte, Nordeste, Centro-Oeste, Sudeste, Sul).
+
+Sua análise é sempre objetiva, direta e nunca genérica — nunca escreva frases vagas de curso motivacional. Você entende profundamente as diferenças culturais, econômicas e de infraestrutura entre uma capital e uma cidade de interior, e adapta cada recomendação à realidade local, ao setor e ao porte informados — nunca soluções de manual, sempre aplicáveis, de baixo custo e de rápida implementação.
+
+Você analisa a empresa de forma completa, olhando para TODOS os setores internos: administração/gestão, comercial/vendas, financeiro, RH/equipe (incluindo vendedores e pessoal de apoio), operações/atendimento, marketing/presença digital e tecnologia — não só a "loja" de forma superficial.
+
+Responda SOMENTE com um JSON válido, sem markdown, sem texto antes ou depois, seguindo exatamente este formato:
+
+{
+  "resumo": "2 a 3 frases resumindo o diagnóstico geral, direto ao ponto",
+  "contexto_regional": "1 a 2 frases sobre como a região/cidade/cultura local influencia as prioridades desta empresa",
+  "score_geral": 742,
+  "indices": {
+    "financeiro": 80,
+    "comercial": 70,
+    "marketing": 60,
+    "operacional": 75,
+    "tecnologico": 55,
+    "inovacao": 45
+  },
+  "diagnostico_setores": [
+    {
+      "setor": "Administração / Gestão",
+      "nota": 70,
+      "avaliacao": "2 a 3 frases avaliando como a gestão do negócio está sendo conduzida hoje, com base no porte e setor informados",
+      "gargalo_principal": "o maior travamento identificado nesse setor especificamente"
+    },
+    {
+      "setor": "Comercial / Vendas",
+      "nota": 65,
+      "avaliacao": "2 a 3 frases sobre a equipe de vendas, abordagem ao cliente, técnica comercial",
+      "gargalo_principal": "..."
+    },
+    {
+      "setor": "Financeiro",
+      "nota": 60,
+      "avaliacao": "2 a 3 frases sobre fluxo de caixa, precificação, custos, crédito",
+      "gargalo_principal": "..."
+    },
+    {
+      "setor": "RH / Equipe",
+      "nota": 65,
+      "avaliacao": "2 a 3 frases sobre contratação, treinamento, motivação e retenção da equipe (incluindo vendedores e pessoal de apoio)",
+      "gargalo_principal": "..."
+    },
+    {
+      "setor": "Operações / Atendimento",
+      "nota": 70,
+      "avaliacao": "2 a 3 frases sobre processos do dia a dia, tempo de atendimento, logística interna",
+      "gargalo_principal": "..."
+    },
+    {
+      "setor": "Marketing / Presença Digital",
+      "nota": 50,
+      "avaliacao": "2 a 3 frases sobre como a empresa se comunica e se apresenta ao mercado local",
+      "gargalo_principal": "..."
+    },
+    {
+      "setor": "Tecnologia",
+      "nota": 55,
+      "avaliacao": "2 a 3 frases sobre uso de sistemas, automação e ferramentas digitais no dia a dia",
+      "gargalo_principal": "..."
+    }
+  ],
+  "areas_impacto": [
+    {
+      "area": "nome curto da área (ex: Atendimento ao Cliente, Presença Digital, Processos Internos)",
+      "problema": "o problema identificado nessa área, direto e específico ao contexto informado",
+      "urgencia": "alta | media | baixa",
+      "solucao": "a solução de inovação recomendada, específica e aplicável",
+      "como_aplicar": "passos práticos numerados de como aplicar, em linguagem simples, formatado como '1) ... 2) ... 3) ...'",
+      "custo_estimado": "faixa de custo aproximada em R$ ou 'baixo/médio/alto'",
+      "prazo": "prazo estimado para ver resultado (ex: 2 semanas, 1 mês)"
+    }
+  ],
+  "plano_30_60_90": {
+    "dias_30": ["2 a 3 ações objetivas para os primeiros 30 dias"],
+    "dias_60": ["2 a 3 ações objetivas para os dias 31 a 60"],
+    "dias_90": ["2 a 3 ações objetivas para os dias 61 a 90"]
+  },
+  "quick_wins": ["3 a 4 ações que a empresa pode aplicar JÁ NESTA SEMANA, sem custo ou com custo mínimo"],
+  "proxima_etapa": "1 frase convidando a empresa a aprofundar a análise com uma consultoria completa"
+}
+
+Preencha "diagnostico_setores" com avaliação real e específica para CADA um dos 7 setores listados — nunca genérica, sempre amarrada ao setor de atuação, porte e cidade informados. Isso é obrigatório mesmo que a empresa seja pequena: adapte a linguagem (ex: "RH" numa empresa pequena pode ser só o dono e 2 funcionários, mas ainda assim avalie liderança e organização da equipe).
+
+"score_geral" é um número de 0 a 1000 refletindo a maturidade geral da empresa (quanto maior, mais madura/inovadora). Os "indices" são de 0 a 100 cada, coerentes com o score_geral e com o diagnóstico. Gere entre 4 e 5 itens em "areas_impacto", ordenados por urgência (alta primeiro). Seja específico ao setor, porte e região informados — evite generalidades como "invista em marketing digital" sem contexto.`;
+
+  const userPrompt = `Empresa: ${nomeEmpresa}
+Setor: ${setor}
+Porte: ${porteSelecionado}
+Cidade: ${cidade} - ${uf} (Região ${regiao})
+Principais dores relatadas: ${dores || "não informado, use seu conhecimento de mercado para o setor e porte"}
+
+Faça o diagnóstico de inovação desta empresa.`;
+
+  try{
+    const response = await fetch(CONFIG.apiEndpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: CONFIG.model,
+        max_tokens: 1000,
+        system: systemPrompt,
+        messages: [{ role: "user", content: userPrompt }]
+      })
+    });
+
+    const data = await response.json();
+    const raw = (data.content || []).map(b => b.text || "").join("").trim();
+    const clean = raw.replace(/^```json/i,"").replace(/^```/,"").replace(/```$/,"").trim();
+    const result = JSON.parse(clean);
+
+    renderResults(result, {nomeEmpresa, setor, porteSelecionado, cidade, uf, regiao});
+
+  }catch(e){
+    document.getElementById('loadingPanel').classList.add('hidden');
+    document.getElementById('formPanel').classList.remove('hidden');
+    document.getElementById('formErr').innerHTML = '<div class="err">Não foi possível concluir a análise agora. Tente novamente em instantes.</div>';
+    console.error(e);
+  }finally{
+    clearInterval(scanInterval);
+  }
+});
+
+/* ---------- render results ---------- */
+let lastResult = null;
+let lastMeta = null;
+
+function urgBadge(u){
+  const map = {alta:["Alta prioridade","badge-alta"], media:["Prioridade média","badge-media"], baixa:["Prioridade baixa","badge-baixa"]};
+  const [label, cls] = map[u] || map.media;
+  return `<span class="badge ${cls}">${label}</span>`;
+}
+
+const IDX_LABELS = {
+  financeiro:"Financeiro", comercial:"Comercial", marketing:"Marketing",
+  operacional:"Operacional", tecnologico:"Tecnológico", inovacao:"Inovação"
+};
+
+function renderResults(result, meta){
+  lastResult = result; lastMeta = meta;
+
+  document.getElementById('loadingPanel').classList.add('hidden');
+  document.getElementById('resultsPanel').classList.remove('hidden');
+
+  // Score
+  const score = Math.max(0, Math.min(1000, Number(result.score_geral) || 0));
+  const pct = Math.round(score/10);
+  const indices = result.indices || {};
+  const idxHtml = Object.keys(IDX_LABELS).map(k=>{
+    const v = Math.max(0, Math.min(100, Number(indices[k]) || 0));
+    return `
+      <div class="idx-row">
+        <div class="idx-top"><b>${IDX_LABELS[k]}</b><span>${v}/100</span></div>
+        <div class="idx-bar"><div class="idx-fill" style="width:${v}%;"></div></div>
+      </div>`;
+  }).join("");
+
+  document.getElementById('scoreBox').innerHTML = `
+    <div class="eyebrow">Score Empresarial</div>
+    <div class="score-wrap">
+      <div class="score-ring" style="--pct:${pct};">
+        <div class="score-inner">
+          <div class="score-num">${score}</div>
+          <div class="score-max">/ 1000</div>
+        </div>
+      </div>
+      <div class="idx-list">${idxHtml}</div>
+    </div>
+  `;
+
+  document.getElementById('resumoBox').innerHTML = `
+    <div class="eyebrow">Diagnóstico · ${meta.nomeEmpresa}</div>
+    <p style="font-size:15px;line-height:1.6;margin-top:10px;">${result.resumo}</p>
+    <p style="font-size:13.5px;color:var(--text-dim);margin-top:12px;border-top:1px solid var(--line);padding-top:12px;">
+      <b style="color:var(--gold-light);">Contexto regional:</b> ${result.contexto_regional}
+    </p>
+  `;
+
+  const setoresHtml = (result.diagnostico_setores || []).map(s => `
+    <div class="setor-card">
+      <div class="setor-top">
+        <h4>${s.setor}</h4>
+        <span class="setor-nota">${s.nota}/100</span>
+      </div>
+      <p>${s.avaliacao}</p>
+      <p class="gargalo"><b>Gargalo principal:</b> ${s.gargalo_principal}</p>
+    </div>
+  `).join("");
+  document.getElementById('setoresBox').innerHTML = setoresHtml;
+
+  const areasHtml = (result.areas_impacto || []).map(a => `
+    <div class="area-card">
+      ${urgBadge((a.urgencia||"").toLowerCase())}
+      <h3>${a.area}</h3>
+      <p><b style="color:var(--text-dim);">Problema:</b> ${a.problema}</p>
+      <p><b style="color:var(--gold-light);">Solução:</b> ${a.solucao}</p>
+      <p><b style="color:var(--text-dim);">Como aplicar:</b> ${a.como_aplicar}</p>
+      <div class="area-meta">
+        <span>💰 ${a.custo_estimado}</span>
+        <span>⏱ ${a.prazo}</span>
+      </div>
+    </div>
+  `).join("");
+  document.getElementById('areasBox').innerHTML = areasHtml;
+
+  const plano = result.plano_30_60_90 || {};
+  const planCol = (titulo, itens) => `
+    <div class="plan-col">
+      <h4>${titulo}</h4>
+      <ul>${(itens||[]).map(i=>`<li>${i}</li>`).join("")}</ul>
+    </div>`;
+  document.getElementById('planBox').innerHTML = `
+    <div class="plan-cols">
+      ${planCol("30 dias", plano.dias_30)}
+      ${planCol("60 dias", plano.dias_60)}
+      ${planCol("90 dias", plano.dias_90)}
+    </div>
+  `;
+
+  const qwHtml = (result.quick_wins || []).map((q,i)=>`
+    <li><span class="qw-num">${i+1}</span><span>${q}</span></li>
+  `).join("");
+  document.getElementById('quickWinsBox').innerHTML = `
+    <div class="section-label" style="margin-top:0;">Ações rápidas para esta semana</div>
+    <ul class="qw-list">${qwHtml}</ul>
+    <p style="font-size:13.5px;color:var(--text-dim);margin-top:14px;">${result.proxima_etapa || ""}</p>
+  `;
+
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+document.getElementById('btnNova').addEventListener('click', ()=>{
+  document.getElementById('resultsPanel').classList.add('hidden');
+  document.getElementById('formPanel').classList.remove('hidden');
+  window.scrollTo({top:0, behavior:'smooth'});
+});
+
+document.getElementById('btnWhats').addEventListener('click', ()=>{
+  const msg = `Olá! Fiz o diagnóstico de inovação da empresa ${lastMeta ? lastMeta.nomeEmpresa : ""} pelo site e quero saber mais sobre a consultoria completa.`;
+  window.open(`https://wa.me/${CONFIG.whatsappNumber}?text=${encodeURIComponent(msg)}`, "_blank");
+});
+
+document.getElementById('btnPdf').addEventListener('click', ()=>{
+  if(!lastResult) return;
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  const marginX = 15;
+  let y = 20;
+
+  // capa/cabeçalho
+  doc.setFillColor(13,35,24);
+  doc.rect(0,0,210,35,'F');
+  doc.setTextColor(201,162,74);
+  doc.setFontSize(16);
+  doc.setFont(undefined,'bold');
+  doc.text("Diagnóstico Empresarial AI", marginX, 16);
+  doc.setFontSize(10);
+  doc.setTextColor(230,225,210);
+  doc.text(`${lastMeta.nomeEmpresa} · ${lastMeta.cidade}/${lastMeta.uf} · ${lastMeta.setor}`, marginX, 24);
+  doc.setTextColor(180,170,150);
+  doc.text(CONFIG.agencyName, marginX, 30);
+
+  y = 46;
+  doc.setTextColor(20,20,20);
+  doc.setFont(undefined,'bold');
+  doc.setFontSize(13);
+  doc.text(`Score Empresarial: ${lastResult.score_geral} / 1000`, marginX, y); y += 8;
+
+  doc.setFont(undefined,'bold');
+  doc.setFontSize(12);
+  doc.text("Resumo", marginX, y); y += 6;
+  doc.setFont(undefined,'normal');
+  doc.setFontSize(10.5);
+  y = writeWrapped(doc, lastResult.resumo, marginX, y, 180);
+  y += 4;
+  y = writeWrapped(doc, "Contexto regional: " + lastResult.contexto_regional, marginX, y, 180);
+  y += 8;
+
+  doc.setFont(undefined,'bold');
+  doc.setFontSize(12);
+  doc.text("Diagnóstico por setor", marginX, y); y += 7;
+  (lastResult.diagnostico_setores || []).forEach(s=>{
+    if(y > 260){ doc.addPage(); y = 20; }
+    doc.setFont(undefined,'bold');
+    doc.setFontSize(10.5);
+    doc.setTextColor(150,115,45);
+    doc.text(`${s.setor}  —  ${s.nota}/100`, marginX, y); y += 5;
+    doc.setFont(undefined,'normal');
+    doc.setFontSize(10);
+    doc.setTextColor(20,20,20);
+    y = writeWrapped(doc, s.avaliacao, marginX, y, 180); y += 1;
+    y = writeWrapped(doc, "Gargalo principal: " + s.gargalo_principal, marginX, y, 180);
+    y += 5;
+  });
+  y += 3;
+
+  doc.setFont(undefined,'bold');
+  doc.setFontSize(12);
+  doc.setTextColor(20,20,20);
+  doc.text("Áreas de impacto imediato", marginX, y); y += 7;
+
+  (lastResult.areas_impacto || []).forEach((a, idx)=>{
+    if(y > 265){ doc.addPage(); y = 20; }
+    doc.setFont(undefined,'bold');
+    doc.setFontSize(11);
+    doc.setTextColor(150,115,45);
+    doc.text(`${idx+1}. ${a.area}  [${(a.urgencia||"").toUpperCase()}]`, marginX, y); y += 6;
+    doc.setFont(undefined,'normal');
+    doc.setFontSize(10);
+    doc.setTextColor(20,20,20);
+    y = writeWrapped(doc, "Problema: " + a.problema, marginX, y, 180); y += 2;
+    y = writeWrapped(doc, "Solução: " + a.solucao, marginX, y, 180); y += 2;
+    y = writeWrapped(doc, "Como aplicar: " + a.como_aplicar, marginX, y, 180); y += 2;
+    y = writeWrapped(doc, `Custo: ${a.custo_estimado}  |  Prazo: ${a.prazo}`, marginX, y, 180);
+    y += 8;
+  });
+
+  if(y > 240){ doc.addPage(); y = 20; }
+  doc.setFont(undefined,'bold');
+  doc.setFontSize(12);
+  doc.setTextColor(20,20,20);
+  doc.text("Plano de ação · 30 / 60 / 90 dias", marginX, y); y += 7;
+  const plano = lastResult.plano_30_60_90 || {};
+  [["30 dias", plano.dias_30], ["60 dias", plano.dias_60], ["90 dias", plano.dias_90]].forEach(([label, itens])=>{
+    if(y > 265){ doc.addPage(); y = 20; }
+    doc.setFont(undefined,'bold');
+    doc.setFontSize(10.5);
+    doc.setTextColor(150,115,45);
+    doc.text(label, marginX, y); y += 5;
+    doc.setFont(undefined,'normal');
+    doc.setFontSize(10);
+    doc.setTextColor(20,20,20);
+    (itens||[]).forEach(i=>{
+      if(y > 270){ doc.addPage(); y = 20; }
+      y = writeWrapped(doc, "• " + i, marginX, y, 180);
+    });
+    y += 4;
+  });
+
+  if(y > 250){ doc.addPage(); y = 20; }
+  doc.setFont(undefined,'bold');
+  doc.setFontSize(12);
+  doc.setTextColor(20,20,20);
+  doc.text("Ações rápidas desta semana", marginX, y); y += 7;
+  doc.setFont(undefined,'normal');
+  doc.setFontSize(10);
+  (lastResult.quick_wins || []).forEach((q,i)=>{
+    if(y > 270){ doc.addPage(); y = 20; }
+    y = writeWrapped(doc, `${i+1}. ${q}`, marginX, y, 180); y += 2;
+  });
+
+  doc.save(`diagnostico-${lastMeta.nomeEmpresa.replace(/\s+/g,'-').toLowerCase()}.pdf`);
+});
+
+function writeWrapped(doc, text, x, y, maxWidth, lineHeight=5.2){
+  const lines = doc.splitTextToSize(text || "", maxWidth);
+  lines.forEach(line=>{
+    doc.text(line, x, y);
+    y += lineHeight;
+  });
+  return y;
+}
+</script>
+</body>
+</html>
+
+	
+To
+
+
+---------- Forwarded message ---------
+From: Ricardo Contreras <ricardocontreras19988@gmail.com>
+Date: Tue, Jul 7, 2026 at 6:58 PM
+Subject:
+To: <ricardocontreras102030@gmail.com>
+
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diagnóstico Empresarial AI | Digital Chevalier Card</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+/* ============================================================
+   CONFIG — paleta: verde-escuro / bege / dourado
+   ============================================================ */
+:root{
+  --forest-0:#081712;
+  --forest-1:#0d2318;
+  --forest-2:#1e4632;
+  --panel:#0f261b;
+  --line:rgba(201,162,74,0.22);
+  --gold:#c9a24a;
+  --gold-light:#e6c878;
+  --gold-deep:#9c7a2e;
+  --beige:#ede4d2;
+  --beige-dim:#c7bda3;
+  --text:#f4efe1;
+  --text-dim:#a79f8a;
+  --danger:#c1553f;
+  --warn:#c9a24a;
+  --ok:#7fa06a;
+}
+
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--forest-0);
+  color:var(--text);
+  font-family:'Inter',system-ui,-apple-system,sans-serif;
+  min-height:100vh;
+  position:relative;
+  overflow-x:hidden;
+}
+h1,h2,h3,.display{font-family:'Fraunces',Georgia,serif;}
+
+/* elegant background texture */
+.circuit-bg{
+  position:fixed; inset:0; z-index:0; pointer-events:none;
+  background:
+    radial-gradient(ellipse 900px 550px at 12% -8%, rgba(201,162,74,0.10), transparent 60%),
+    radial-gradient(ellipse 700px 600px at 105% 15%, rgba(201,162,74,0.06), transparent 60%),
+    linear-gradient(180deg, var(--forest-0), #0b1f16 45%, var(--forest-0));
+}
+.circuit-bg::before{
+  content:'';
+  position:absolute; inset:0;
+  background-image: repeating-linear-gradient(135deg, var(--line) 0px, var(--line) 1px, transparent 1px, transparent 64px);
+  mask-image:radial-gradient(ellipse 1200px 800px at 50% 0%, black, transparent 72%);
+  opacity:.6;
+}
+
+.wrap{position:relative;z-index:1;max-width:760px;margin:0 auto;padding:0 20px 80px;}
+
+/* ---------- header / hero ---------- */
+header{padding:38px 0 26px;text-align:center;}
+.eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--gold-light);border:1px solid var(--line);
+  padding:6px 14px;border-radius:2px;background:rgba(201,162,74,.06);
+  margin-bottom:22px;font-weight:600;
+}
+.eyebrow::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--gold);box-shadow:0 0 8px var(--gold);}
+h1{
+  font-size:clamp(26px,6vw,38px);
+  font-weight:600;
+  line-height:1.2;
+  letter-spacing:-0.01em;
+  color:var(--beige);
+}
+h1 .accent{color:var(--gold-light);font-style:italic;}
+.sub{
+  color:var(--text-dim);
+  font-size:15px;
+  max-width:520px;
+  margin:16px auto 0;
+  line-height:1.6;
+}
+
+/* ---------- cards / panels ---------- */
+.panel{
+  background:linear-gradient(180deg, rgba(15,38,27,.92), rgba(8,23,18,.92));
+  border:1px solid var(--line);
+  border-radius:6px;
+  padding:26px 22px;
+  margin-top:22px;
+  box-shadow:0 20px 50px -20px rgba(0,0,0,.7);
+}
+
+label{
+  display:block;font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--gold-light);margin-bottom:8px;font-weight:600;
+}
+.field{margin-bottom:20px;}
+input[type=text], select, textarea{
+  width:100%;background:var(--forest-0);border:1px solid rgba(237,228,210,.14);
+  color:var(--text);padding:13px 14px;border-radius:4px;font-size:15px;
+  font-family:inherit;transition:border-color .2s, box-shadow .2s;
+}
+input[type=text]:focus, select:focus, textarea:focus{
+  outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,162,74,.15);
+}
+textarea{resize:vertical;min-height:90px;line-height:1.5;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+@media(max-width:520px){.grid2{grid-template-columns:1fr;}}
+
+.chip-row{display:flex;gap:10px;flex-wrap:wrap;}
+.chip{
+  flex:1;min-width:120px;text-align:center;padding:12px 10px;border-radius:4px;
+  border:1px solid rgba(237,228,210,.16);cursor:pointer;font-size:14px;font-weight:600;
+  color:var(--text-dim);transition:all .15s;background:var(--forest-0);
+}
+.chip.active{border-color:var(--gold);color:var(--gold-light);background:rgba(201,162,74,.08);box-shadow:0 0 0 1px var(--gold) inset;}
+
+.btn{
+  appearance:none;border:none;cursor:pointer;font-family:'Inter',sans-serif;
+  width:100%;padding:16px;border-radius:4px;font-size:15px;font-weight:700;
+  letter-spacing:.02em;display:flex;align-items:center;justify-content:center;gap:10px;
+  transition:transform .12s, box-shadow .2s;
+}
+.btn:active{transform:scale(.98);}
+.btn-primary{
+  background:linear-gradient(135deg, var(--gold-light), var(--gold-deep));
+  color:#16130a;box-shadow:0 12px 30px -10px rgba(201,162,74,.5);
+}
+.btn-primary:disabled{opacity:.55;cursor:not-allowed;}
+.btn-ghost{
+  background:transparent;border:1px solid rgba(237,228,210,.2);color:var(--beige);
+  margin-top:12px;
+}
+.btn-whats{
+  background:linear-gradient(135deg,#25D366,#128C4A);color:#06210f;
+}
+
+/* ---------- loading / scan ---------- */
+.scan-wrap{text-align:center;padding:50px 10px;}
+.scan-ring{
+  width:96px;height:96px;margin:0 auto 26px;position:relative;
+}
+.scan-ring::before, .scan-ring::after{
+  content:'';position:absolute;inset:0;border-radius:50%;
+  border:2px solid transparent;
+}
+.scan-ring::before{
+  border-top-color:var(--gold);border-right-color:var(--beige-dim);
+  animation:spin 1.1s linear infinite;
+}
+.scan-ring::after{
+  inset:14px;border-top-color:var(--beige-dim);border-left-color:var(--gold);
+  animation:spin 1.6s linear infinite reverse;
+}
+@keyframes spin{to{transform:rotate(360deg);}}
+.scan-text{color:var(--text-dim);font-size:14px;min-height:20px;}
+.scan-title{font-weight:600;font-size:17px;margin-bottom:8px;font-family:'Fraunces',serif;}
+
+/* ---------- score gauge ---------- */
+.score-wrap{display:flex;align-items:center;gap:22px;flex-wrap:wrap;justify-content:center;text-align:left;}
+.score-ring{
+  width:132px;height:132px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;position:relative;
+  background:conic-gradient(var(--gold) calc(var(--pct)*1%), rgba(237,228,210,.08) 0);
+}
+.score-ring::before{
+  content:'';position:absolute;inset:9px;border-radius:50%;background:var(--panel);
+}
+.score-inner{position:relative;z-index:1;text-align:center;}
+.score-num{font-family:'Fraunces',serif;font-size:30px;font-weight:600;color:var(--gold-light);line-height:1;}
+.score-max{font-size:11px;color:var(--text-dim);margin-top:2px;}
+.score-label{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold-light);margin-top:6px;font-weight:600;}
+
+.idx-list{flex:1;min-width:200px;}
+.idx-row{margin-bottom:10px;}
+.idx-top{display:flex;justify-content:space-between;font-size:12.5px;color:var(--text-dim);margin-bottom:4px;}
+.idx-top b{color:var(--beige);font-weight:600;}
+.idx-bar{height:6px;border-radius:3px;background:rgba(237,228,210,.1);overflow:hidden;}
+.idx-fill{height:100%;background:linear-gradient(90deg,var(--gold-deep),var(--gold-light));border-radius:3px;}
+
+/* ---------- results ---------- */
+.badge{
+  display:inline-block;font-size:11px;font-weight:700;letter-spacing:.04em;
+  padding:4px 10px;border-radius:2px;text-transform:uppercase;
+}
+.badge-alta{background:rgba(193,85,63,.15);color:#e0846f;border:1px solid rgba(193,85,63,.4);}
+.badge-media{background:rgba(201,162,74,.15);color:var(--gold-light);border:1px solid rgba(201,162,74,.4);}
+.badge-baixa{background:rgba(127,160,106,.15);color:var(--ok);border:1px solid rgba(127,160,106,.4);}
+
+.area-card{
+  border:1px solid rgba(237,228,210,.1);border-radius:6px;padding:18px;margin-top:14px;
+  background:rgba(237,228,210,.02);
+}
+.area-card h3{font-size:16px;margin:10px 0 6px;color:var(--gold-light);font-weight:600;}
+.area-card p{font-size:14px;line-height:1.55;color:var(--text);margin-bottom:8px;}
+.area-meta{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--text-dim);margin-top:10px;}
+.area-meta span{display:flex;align-items:center;gap:5px;}
+
+.qw-list{list-style:none;margin-top:10px;}
+.qw-list li{
+  display:flex;gap:10px;padding:10px 0;border-bottom:1px dashed rgba(237,228,210,.1);
+  font-size:14px;line-height:1.5;
+}
+.qw-list li:last-child{border-bottom:none;}
+.qw-num{
+  flex-shrink:0;width:22px;height:22px;border-radius:3px;background:rgba(201,162,74,.12);
+  border:1px solid rgba(201,162,74,.4);color:var(--gold-light);font-size:12px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+}
+
+.section-label{
+  font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-light);
+  font-weight:700;margin:26px 0 4px;
+}
+
+/* ---------- plano 30/60/90 ---------- */
+.plan-cols{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:14px;}
+@media(max-width:640px){.plan-cols{grid-template-columns:1fr;}}
+.plan-col{border:1px solid var(--line);border-radius:6px;padding:16px;background:rgba(237,228,210,.02);}
+.plan-col h4{font-family:'Fraunces',serif;color:var(--gold-light);font-size:15px;font-weight:600;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--line);}
+.plan-col ul{list-style:none;}
+.plan-col li{font-size:13px;line-height:1.5;color:var(--text);padding:6px 0;display:flex;gap:8px;}
+.plan-col li::before{content:'—';color:var(--gold);flex-shrink:0;}
+
+/* ---------- setores ---------- */
+.setor-card{
+  border:1px solid rgba(237,228,210,.1);border-radius:6px;padding:16px 18px;margin-top:10px;
+  background:rgba(237,228,210,.02);
+}
+.setor-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:10px;}
+.setor-top h4{font-family:'Fraunces',serif;font-size:15px;font-weight:600;color:var(--gold-light);}
+.setor-nota{font-size:13px;font-weight:700;color:var(--beige);background:rgba(201,162,74,.12);border:1px solid var(--line);padding:3px 10px;border-radius:100px;flex-shrink:0;}
+.setor-card p{font-size:13.5px;line-height:1.55;color:var(--text);margin-bottom:6px;}
+.setor-card .gargalo{font-size:13px;color:var(--text-dim);border-top:1px dashed rgba(237,228,210,.1);padding-top:8px;margin-top:8px;}
+.setor-card .gargalo b{color:#e0846f;}
+
+.err{
+  background:rgba(193,85,63,.1);border:1px solid rgba(193,85,63,.35);color:#e8a898;
+  padding:14px;border-radius:4px;font-size:13.5px;margin-top:16px;line-height:1.5;
+}
+
+.footer-note{text-align:center;color:var(--text-dim);font-size:12px;margin-top:30px;line-height:1.7;}
+.footer-note b{color:var(--gold-light);}
+
+.hidden{display:none !important;}
+</style>
+</head>
+<body>
+
+<div class="circuit-bg"></div>
+
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">Diagnóstico Empresarial AI</div>
+    <h1>Sua empresa está perdendo clientes por falta de <span class="accent">inovação</span>?</h1>
+    <p class="sub">Um agente de análise objetivo avalia sua empresa e entrega, em minutos, o score empresarial, as áreas de impacto imediato e um plano de ação de 30/60/90 dias.</p>
+  </header>
+
+  <!-- ============ FORM ============ -->
+  <div class="panel" id="formPanel">
+    <div class="field">
+      <label>Nome da empresa</label>
+      <input type="text" id="nomeEmpresa" placeholder="Ex: Bazar da Bolinha">
+    </div>
+
+    <div class="field grid2">
+      <div>
+        <label>Setor / segmento</label>
+        <select id="setor">
+          <option value="">Selecione</option>
+          <option>Varejo / loja física</option>
+          <option>E-commerce</option>
+          <option>Serviços (geral)</option>
+          <option>Alimentação / restaurante</option>
+          <option>Saúde / clínica</option>
+          <option>Educação</option>
+          <option>Construção / imóveis</option>
+          <option>Indústria</option>
+          <option>Tecnologia</option>
+          <option>Agronegócio</option>
+          <option>Beleza / estética</option>
+          <option>Autopeças / oficina</option>
+          <option>Outro</option>
+        </select>
+      </div>
+      <div>
+        <label>Estado (UF)</label>
+        <select id="uf"></select>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Cidade</label>
+      <input type="text" id="cidade" placeholder="Ex: Paulo Afonso">
+    </div>
+
+    <div class="field">
+      <label>Porte da empresa</label>
+      <div class="chip-row" id="porteChips">
+        <div class="chip" data-v="Pequeno porte (até 19 funcionários)">Pequeno porte</div>
+        <div class="chip" data-v="Médio porte (20–100 funcionários)">Médio porte</div>
+        <div class="chip" data-v="Grande porte (100+ funcionários)">Grande porte</div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Principais dores hoje (opcional, mas melhora muito a análise)</label>
+      <textarea id="dores" placeholder="Ex: concorrência forte, atendimento lento, pouca presença digital, equipe resistente a mudanças..."></textarea>
+    </div>
+
+    <button class="btn btn-primary" id="btnAnalisar">
+      Iniciar análise de inovação
+    </button>
+    <div id="formErr"></div>
+  </div>
+
+  <!-- ============ LOADING ============ -->
+  <div class="panel hidden" id="loadingPanel">
+    <div class="scan-wrap">
+      <div class="scan-ring"></div>
+      <div class="scan-title">Analisando sua empresa…</div>
+      <div class="scan-text" id="scanMsg">Cruzando setor, porte e contexto regional</div>
+    </div>
+  </div>
+
+  <!-- ============ RESULTS ============ -->
+  <div class="hidden" id="resultsPanel">
+    <div class="panel" id="scoreBox"></div>
+
+    <div class="panel" id="resumoBox"></div>
+
+    <div class="section-label">Diagnóstico por setor</div>
+    <div id="setoresBox"></div>
+
+    <div class="section-label">Áreas de impacto imediato</div>
+    <div id="areasBox"></div>
+
+    <div class="section-label">Plano de ação · 30 / 60 / 90 dias</div>
+    <div id="planBox"></div>
+
+    <div class="panel" id="quickWinsBox" style="margin-top:26px;"></div>
+
+    <button class="btn btn-primary" id="btnWhats" style="margin-top:26px;background:linear-gradient(135deg,#25D366,#128C4A);color:#06210f;">
+      Falar com um consultor agora
+    </button>
+    <button class="btn btn-ghost" id="btnPdf">Baixar diagnóstico em PDF</button>
+    <button class="btn btn-ghost" id="btnNova">Fazer nova análise</button>
+  </div>
+
+  <div class="footer-note">
+    Análise gerada por agente de IA · <b>Digital Chevalier Card</b><br>
+    Consultoria em inovação e transformação digital para empresas em todo o Brasil
+  </div>
+
+</div>
+
+<script>
+/* ============================================================
+   CONFIG
+   ============================================================ */
+const CONFIG = {
+  agencyName: "Digital Chevalier Card",
+  whatsappNumber: "5575991771095", // (75) 99177-1095
+  model: "claude-sonnet-4-6",
+  // Troque pela URL do seu Worker depois do deploy no Cloudflare
+  apiEndpoint: "https://diagnostico-ia-proxy.SEU-SUBDOMINIO.workers.dev"
+};
+
+/* ---------- UF / Região map ---------- */
+const UF_REGIAO = {
+  AC:"Norte", AP:"Norte", AM:"Norte", PA:"Norte", RO:"Norte", RR:"Norte", TO:"Norte",
+  AL:"Nordeste", BA:"Nordeste", CE:"Nordeste", MA:"Nordeste", PB:"Nordeste", PE:"Nordeste",
+  PI:"Nordeste", RN:"Nordeste", SE:"Nordeste",
+  DF:"Centro-Oeste", GO:"Centro-Oeste", MT:"Centro-Oeste", MS:"Centro-Oeste",
+  ES:"Sudeste", MG:"Sudeste", RJ:"Sudeste", SP:"Sudeste",
+  PR:"Sul", RS:"Sul", SC:"Sul"
+};
+const ufSelect = document.getElementById('uf');
+Object.keys(UF_REGIAO).sort().forEach(uf=>{
+  const opt = document.createElement('option');
+  opt.value = uf; opt.textContent = uf;
+  ufSelect.appendChild(opt);
+});
+
+/* ---------- porte chips ---------- */
+let porteSelecionado = "";
+document.querySelectorAll('#porteChips .chip').forEach(chip=>{
+  chip.addEventListener('click', ()=>{
+    document.querySelectorAll('#porteChips .chip').forEach(c=>c.classList.remove('active'));
+    chip.classList.add('active');
+    porteSelecionado = chip.dataset.v;
+  });
+});
+
+/* ---------- scan messages rotation ---------- */
+const scanMsgs = [
+  "Cruzando setor, porte e contexto regional",
+  "Mapeando padrões de mercado da sua cidade",
+  "Calculando score empresarial",
+  "Identificando áreas de maior impacto imediato",
+  "Montando o plano de ação de 30, 60 e 90 dias"
+];
+let scanInterval;
+
+function setScanMsg(){
+  const el = document.getElementById('scanMsg');
+  let i = 0;
+  el.textContent = scanMsgs[0];
+  scanInterval = setInterval(()=>{
+    i = (i+1) % scanMsgs.length;
+    el.textContent = scanMsgs[i];
+  }, 1400);
+}
+
+/* ---------- main flow ---------- */
+document.getElementById('btnAnalisar').addEventListener('click', async ()=>{
+  const nomeEmpresa = document.getElementById('nomeEmpresa').value.trim();
+  const setor = document.getElementById('setor').value;
+  const uf = ufSelect.value;
+  const cidade = document.getElementById('cidade').value.trim();
+  const dores = document.getElementById('dores').value.trim();
+  const errBox = document.getElementById('formErr');
+  errBox.innerHTML = "";
+
+  if(!nomeEmpresa || !setor || !uf || !cidade || !porteSelecionado){
+    errBox.innerHTML = '<div class="err">Preencha nome, setor, estado, cidade e porte da empresa para continuar.</div>';
+    return;
+  }
+
+  document.getElementById('formPanel').classList.add('hidden');
+  document.getElementById('loadingPanel').classList.remove('hidden');
+  setScanMsg();
+
+  const regiao = UF_REGIAO[uf];
+
+  const systemPrompt = `Você é um consultor sênior de inovação empresarial brasileiro, com décadas de experiência assessorando empresas de médio e grande porte em capitais e municípios do interior, nas cinco regiões do Brasil (Norte, Nordeste, Centro-Oeste, Sudeste, Sul).
+
+Sua análise é sempre objetiva, direta e nunca genérica — nunca escreva frases vagas de curso motivacional. Você entende profundamente as diferenças culturais, econômicas e de infraestrutura entre uma capital e uma cidade de interior, e adapta cada recomendação à realidade local, ao setor e ao porte informados — nunca soluções de manual, sempre aplicáveis, de baixo custo e de rápida implementação.
+
+Você analisa a empresa de forma completa, olhando para TODOS os setores internos: administração/gestão, comercial/vendas, financeiro, RH/equipe (incluindo vendedores e pessoal de apoio), operações/atendimento, marketing/presença digital e tecnologia — não só a "loja" de forma superficial.
+
+Responda SOMENTE com um JSON válido, sem markdown, sem texto antes ou depois, seguindo exatamente este formato:
+
+{
+  "resumo": "2 a 3 frases resumindo o diagnóstico geral, direto ao ponto",
+  "contexto_regional": "1 a 2 frases sobre como a região/cidade/cultura local influencia as prioridades desta empresa",
+  "score_geral": 742,
+  "indices": {
+    "financeiro": 80,
+    "comercial": 70,
+    "marketing": 60,
+    "operacional": 75,
+    "tecnologico": 55,
+    "inovacao": 45
+  },
+  "diagnostico_setores": [
+    {
+      "setor": "Administração / Gestão",
+      "nota": 70,
+      "avaliacao": "2 a 3 frases avaliando como a gestão do negócio está sendo conduzida hoje, com base no porte e setor informados",
+      "gargalo_principal": "o maior travamento identificado nesse setor especificamente"
+    },
+    {
+      "setor": "Comercial / Vendas",
+      "nota": 65,
+      "avaliacao": "2 a 3 frases sobre a equipe de vendas, abordagem ao cliente, técnica comercial",
+      "gargalo_principal": "..."
+    },
+    {
+      "setor": "Financeiro",
+      "nota": 60,
+      "avaliacao": "2 a 3 frases sobre fluxo de caixa, precificação, custos, crédito",
+      "gargalo_principal": "..."
+    },
+    {
+      "setor": "RH / Equipe",
+      "nota": 65,
+      "avaliacao": "2 a 3 frases sobre contratação, treinamento, motivação e retenção da equipe (incluindo vendedores e pessoal de apoio)",
+      "gargalo_principal": "..."
+    },
+    {
+      "setor": "Operações / Atendimento",
+      "nota": 70,
+      "avaliacao": "2 a 3 frases sobre processos do dia a dia, tempo de atendimento, logística interna",
+      "gargalo_principal": "..."
+    },
+    {
+      "setor": "Marketing / Presença Digital",
+      "nota": 50,
+      "avaliacao": "2 a 3 frases sobre como a empresa se comunica e se apresenta ao mercado local",
+      "gargalo_principal": "..."
+    },
+    {
+      "setor": "Tecnologia",
+      "nota": 55,
+      "avaliacao": "2 a 3 frases sobre uso de sistemas, automação e ferramentas digitais no dia a dia",
+      "gargalo_principal": "..."
+    }
+  ],
+  "areas_impacto": [
+    {
+      "area": "nome curto da área (ex: Atendimento ao Cliente, Presença Digital, Processos Internos)",
+      "problema": "o problema identificado nessa área, direto e específico ao contexto informado",
+      "urgencia": "alta | media | baixa",
+      "solucao": "a solução de inovação recomendada, específica e aplicável",
+      "como_aplicar": "passos práticos numerados de como aplicar, em linguagem simples, formatado como '1) ... 2) ... 3) ...'",
+      "custo_estimado": "faixa de custo aproximada em R$ ou 'baixo/médio/alto'",
+      "prazo": "prazo estimado para ver resultado (ex: 2 semanas, 1 mês)"
+    }
+  ],
+  "plano_30_60_90": {
+    "dias_30": ["2 a 3 ações objetivas para os primeiros 30 dias"],
+    "dias_60": ["2 a 3 ações objetivas para os dias 31 a 60"],
+    "dias_90": ["2 a 3 ações objetivas para os dias 61 a 90"]
+  },
+  "quick_wins": ["3 a 4 ações que a empresa pode aplicar JÁ NESTA SEMANA, sem custo ou com custo mínimo"],
+  "proxima_etapa": "1 frase convidando a empresa a aprofundar a análise com uma consultoria completa"
+}
+
+Preencha "diagnostico_setores" com avaliação real e específica para CADA um dos 7 setores listados — nunca genérica, sempre amarrada ao setor de atuação, porte e cidade informados. Isso é obrigatório mesmo que a empresa seja pequena: adapte a linguagem (ex: "RH" numa empresa pequena pode ser só o dono e 2 funcionários, mas ainda assim avalie liderança e organização da equipe).
+
+"score_geral" é um número de 0 a 1000 refletindo a maturidade geral da empresa (quanto maior, mais madura/inovadora). Os "indices" são de 0 a 100 cada, coerentes com o score_geral e com o diagnóstico. Gere entre 4 e 5 itens em "areas_impacto", ordenados por urgência (alta primeiro). Seja específico ao setor, porte e região informados — evite generalidades como "invista em marketing digital" sem contexto.`;
+
+  const userPrompt = `Empresa: ${nomeEmpresa}
+Setor: ${setor}
+Porte: ${porteSelecionado}
+Cidade: ${cidade} - ${uf} (Região ${regiao})
+Principais dores relatadas: ${dores || "não informado, use seu conhecimento de mercado para o setor e porte"}
+
+Faça o diagnóstico de inovação desta empresa.`;
+
+  try{
+    const response = await fetch(CONFIG.apiEndpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: CONFIG.model,
+        max_tokens: 1000,
+        system: systemPrompt,
+        messages: [{ role: "user", content: userPrompt }]
+      })
+    });
+
+    const data = await response.json();
+    const raw = (data.content || []).map(b => b.text || "").join("").trim();
+    const clean = raw.replace(/^```json/i,"").replace(/^```/,"").replace(/```$/,"").trim();
+    const result = JSON.parse(clean);
+
+    renderResults(result, {nomeEmpresa, setor, porteSelecionado, cidade, uf, regiao});
+
+  }catch(e){
+    document.getElementById('loadingPanel').classList.add('hidden');
+    document.getElementById('formPanel').classList.remove('hidden');
+    document.getElementById('formErr').innerHTML = '<div class="err">Não foi possível concluir a análise agora. Tente novamente em instantes.</div>';
+    console.error(e);
+  }finally{
+    clearInterval(scanInterval);
+  }
+});
+
+/* ---------- render results ---------- */
+let lastResult = null;
+let lastMeta = null;
+
+function urgBadge(u){
+  const map = {alta:["Alta prioridade","badge-alta"], media:["Prioridade média","badge-media"], baixa:["Prioridade baixa","badge-baixa"]};
+  const [label, cls] = map[u] || map.media;
+  return `<span class="badge ${cls}">${label}</span>`;
+}
+
+const IDX_LABELS = {
+  financeiro:"Financeiro", comercial:"Comercial", marketing:"Marketing",
+  operacional:"Operacional", tecnologico:"Tecnológico", inovacao:"Inovação"
+};
+
+function renderResults(result, meta){
+  lastResult = result; lastMeta = meta;
+
+  document.getElementById('loadingPanel').classList.add('hidden');
+  document.getElementById('resultsPanel').classList.remove('hidden');
+
+  // Score
+  const score = Math.max(0, Math.min(1000, Number(result.score_geral) || 0));
+  const pct = Math.round(score/10);
+  const indices = result.indices || {};
+  const idxHtml = Object.keys(IDX_LABELS).map(k=>{
+    const v = Math.max(0, Math.min(100, Number(indices[k]) || 0));
+    return `
+      <div class="idx-row">
+        <div class="idx-top"><b>${IDX_LABELS[k]}</b><span>${v}/100</span></div>
+        <div class="idx-bar"><div class="idx-fill" style="width:${v}%;"></div></div>
+      </div>`;
+  }).join("");
+
+  document.getElementById('scoreBox').innerHTML = `
+    <div class="eyebrow">Score Empresarial</div>
+    <div class="score-wrap">
+      <div class="score-ring" style="--pct:${pct};">
+        <div class="score-inner">
+          <div class="score-num">${score}</div>
+          <div class="score-max">/ 1000</div>
+        </div>
+      </div>
+      <div class="idx-list">${idxHtml}</div>
+    </div>
+  `;
+
+  document.getElementById('resumoBox').innerHTML = `
+    <div class="eyebrow">Diagnóstico · ${meta.nomeEmpresa}</div>
+    <p style="font-size:15px;line-height:1.6;margin-top:10px;">${result.resumo}</p>
+    <p style="font-size:13.5px;color:var(--text-dim);margin-top:12px;border-top:1px solid var(--line);padding-top:12px;">
+      <b style="color:var(--gold-light);">Contexto regional:</b> ${result.contexto_regional}
+    </p>
+  `;
+
+  const setoresHtml = (result.diagnostico_setores || []).map(s => `
+    <div class="setor-card">
+      <div class="setor-top">
+        <h4>${s.setor}</h4>
+        <span class="setor-nota">${s.nota}/100</span>
+      </div>
+      <p>${s.avaliacao}</p>
+      <p class="gargalo"><b>Gargalo principal:</b> ${s.gargalo_principal}</p>
+    </div>
+  `).join("");
+  document.getElementById('setoresBox').innerHTML = setoresHtml;
+
+  const areasHtml = (result.areas_impacto || []).map(a => `
+    <div class="area-card">
+      ${urgBadge((a.urgencia||"").toLowerCase())}
+      <h3>${a.area}</h3>
+      <p><b style="color:var(--text-dim);">Problema:</b> ${a.problema}</p>
+      <p><b style="color:var(--gold-light);">Solução:</b> ${a.solucao}</p>
+      <p><b style="color:var(--text-dim);">Como aplicar:</b> ${a.como_aplicar}</p>
+      <div class="area-meta">
+        <span>💰 ${a.custo_estimado}</span>
+        <span>⏱ ${a.prazo}</span>
+      </div>
+    </div>
+  `).join("");
+  document.getElementById('areasBox').innerHTML = areasHtml;
+
+  const plano = result.plano_30_60_90 || {};
+  const planCol = (titulo, itens) => `
+    <div class="plan-col">
+      <h4>${titulo}</h4>
+      <ul>${(itens||[]).map(i=>`<li>${i}</li>`).join("")}</ul>
+    </div>`;
+  document.getElementById('planBox').innerHTML = `
+    <div class="plan-cols">
+      ${planCol("30 dias", plano.dias_30)}
+      ${planCol("60 dias", plano.dias_60)}
+      ${planCol("90 dias", plano.dias_90)}
+    </div>
+  `;
+
+  const qwHtml = (result.quick_wins || []).map((q,i)=>`
+    <li><span class="qw-num">${i+1}</span><span>${q}</span></li>
+  `).join("");
+  document.getElementById('quickWinsBox').innerHTML = `
+    <div class="section-label" style="margin-top:0;">Ações rápidas para esta semana</div>
+    <ul class="qw-list">${qwHtml}</ul>
+    <p style="font-size:13.5px;color:var(--text-dim);margin-top:14px;">${result.proxima_etapa || ""}</p>
+  `;
+
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+document.getElementById('btnNova').addEventListener('click', ()=>{
+  document.getElementById('resultsPanel').classList.add('hidden');
+  document.getElementById('formPanel').classList.remove('hidden');
+  window.scrollTo({top:0, behavior:'smooth'});
+});
+
+document.getElementById('btnWhats').addEventListener('click', ()=>{
+  const msg = `Olá! Fiz o diagnóstico de inovação da empresa ${lastMeta ? lastMeta.nomeEmpresa : ""} pelo site e quero saber mais sobre a consultoria completa.`;
+  window.open(`https://wa.me/${CONFIG.whatsappNumber}?text=${encodeURIComponent(msg)}`, "_blank");
+});
+
+document.getElementById('btnPdf').addEventListener('click', ()=>{
+  if(!lastResult) return;
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  const marginX = 15;
+  let y = 20;
+
+  // capa/cabeçalho
+  doc.setFillColor(13,35,24);
+  doc.rect(0,0,210,35,'F');
+  doc.setTextColor(201,162,74);
+  doc.setFontSize(16);
+  doc.setFont(undefined,'bold');
+  doc.text("Diagnóstico Empresarial AI", marginX, 16);
+  doc.setFontSize(10);
+  doc.setTextColor(230,225,210);
+  doc.text(`${lastMeta.nomeEmpresa} · ${lastMeta.cidade}/${lastMeta.uf} · ${lastMeta.setor}`, marginX, 24);
+  doc.setTextColor(180,170,150);
+  doc.text(CONFIG.agencyName, marginX, 30);
+
+  y = 46;
+  doc.setTextColor(20,20,20);
+  doc.setFont(undefined,'bold');
+  doc.setFontSize(13);
+  doc.text(`Score Empresarial: ${lastResult.score_geral} / 1000`, marginX, y); y += 8;
+
+  doc.setFont(undefined,'bold');
+  doc.setFontSize(12);
+  doc.text("Resumo", marginX, y); y += 6;
+  doc.setFont(undefined,'normal');
+  doc.setFontSize(10.5);
+  y = writeWrapped(doc, lastResult.resumo, marginX, y, 180);
+  y += 4;
+  y = writeWrapped(doc, "Contexto regional: " + lastResult.contexto_regional, marginX, y, 180);
+  y += 8;
+
+  doc.setFont(undefined,'bold');
+  doc.setFontSize(12);
+  doc.text("Diagnóstico por setor", marginX, y); y += 7;
+  (lastResult.diagnostico_setores || []).forEach(s=>{
+    if(y > 260){ doc.addPage(); y = 20; }
+    doc.setFont(undefined,'bold');
+    doc.setFontSize(10.5);
+    doc.setTextColor(150,115,45);
+    doc.text(`${s.setor}  —  ${s.nota}/100`, marginX, y); y += 5;
+    doc.setFont(undefined,'normal');
+    doc.setFontSize(10);
+    doc.setTextColor(20,20,20);
+    y = writeWrapped(doc, s.avaliacao, marginX, y, 180); y += 1;
+    y = writeWrapped(doc, "Gargalo principal: " + s.gargalo_principal, marginX, y, 180);
+    y += 5;
+  });
+  y += 3;
+
+  doc.setFont(undefined,'bold');
+  doc.setFontSize(12);
+  doc.setTextColor(20,20,20);
+  doc.text("Áreas de impacto imediato", marginX, y); y += 7;
+
+  (lastResult.areas_impacto || []).forEach((a, idx)=>{
+    if(y > 265){ doc.addPage(); y = 20; }
+    doc.setFont(undefined,'bold');
+    doc.setFontSize(11);
+    doc.setTextColor(150,115,45);
+    doc.text(`${idx+1}. ${a.area}  [${(a.urgencia||"").toUpperCase()}]`, marginX, y); y += 6;
+    doc.setFont(undefined,'normal');
+    doc.setFontSize(10);
+    doc.setTextColor(20,20,20);
+    y = writeWrapped(doc, "Problema: " + a.problema, marginX, y, 180); y += 2;
+    y = writeWrapped(doc, "Solução: " + a.solucao, marginX, y, 180); y += 2;
+    y = writeWrapped(doc, "Como aplicar: " + a.como_aplicar, marginX, y, 180); y += 2;
+    y = writeWrapped(doc, `Custo: ${a.custo_estimado}  |  Prazo: ${a.prazo}`, marginX, y, 180);
+    y += 8;
+  });
+
+  if(y > 240){ doc.addPage(); y = 20; }
+  doc.setFont(undefined,'bold');
+  doc.setFontSize(12);
+  doc.setTextColor(20,20,20);
+  doc.text("Plano de ação · 30 / 60 / 90 dias", marginX, y); y += 7;
+  const plano = lastResult.plano_30_60_90 || {};
+  [["30 dias", plano.dias_30], ["60 dias", plano.dias_60], ["90 dias", plano.dias_90]].forEach(([label, itens])=>{
+    if(y > 265){ doc.addPage(); y = 20; }
+    doc.setFont(undefined,'bold');
+    doc.setFontSize(10.5);
+    doc.setTextColor(150,115,45);
+    doc.text(label, marginX, y); y += 5;
+    doc.setFont(undefined,'normal');
+    doc.setFontSize(10);
+    doc.setTextColor(20,20,20);
+    (itens||[]).forEach(i=>{
+      if(y > 270){ doc.addPage(); y = 20; }
+      y = writeWrapped(doc, "• " + i, marginX, y, 180);
+    });
+    y += 4;
+  });
+
+  if(y > 250){ doc.addPage(); y = 20; }
+  doc.setFont(undefined,'bold');
+  doc.setFontSize(12);
+  doc.setTextColor(20,20,20);
+  doc.text("Ações rápidas desta semana", marginX, y); y += 7;
+  doc.setFont(undefined,'normal');
+  doc.setFontSize(10);
+  (lastResult.quick_wins || []).forEach((q,i)=>{
+    if(y > 270){ doc.addPage(); y = 20; }
+    y = writeWrapped(doc, `${i+1}. ${q}`, marginX, y, 180); y += 2;
+  });
+
+  doc.save(`diagnostico-${lastMeta.nomeEmpresa.replace(/\s+/g,'-').toLowerCase()}.pdf`);
+});
+
+function writeWrapped(doc, text, x, y, maxWidth, lineHeight=5.2){
+  const lines = doc.splitTextToSize(text || "", maxWidth);
+  lines.forEach(line=>{
+    doc.text(line, x, y);
+    y += lineHeight;
+  });
+  return y;
+}
+</script>
+</body>
+</html>
+
 
