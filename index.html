@@ -70,11 +70,12 @@ header{padding:38px 0 26px;text-align:center;}
 }
 .eyebrow::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--gold);box-shadow:0 0 8px var(--gold);}
 h1{
-  font-size:clamp(26px,6vw,38px);
-  font-weight:600;
-  line-height:1.2;
-  letter-spacing:-0.01em;
+  font-size:clamp(24px,5.6vw,34px);
+  font-weight:700;
+  line-height:1.25;
+  letter-spacing:.01em;
   color:var(--beige);
+  text-transform:uppercase;
 }
 h1 .accent{color:var(--gold-light);font-style:italic;}
 .sub{
@@ -83,6 +84,24 @@ h1 .accent{color:var(--gold-light);font-style:italic;}
   max-width:520px;
   margin:16px auto 0;
   line-height:1.6;
+}
+
+/* ---------- divisor de início ---------- */
+.start-divider{
+  display:flex;align-items:center;gap:14px;
+  margin:30px 0 4px;
+}
+.start-divider .line{
+  flex:1;height:2px;
+  background:linear-gradient(90deg, transparent, var(--gold), var(--gold));
+}
+.start-divider .line.right{
+  background:linear-gradient(90deg, var(--gold), var(--gold), transparent);
+}
+.start-divider span{
+  flex-shrink:0;font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;
+  color:#16130a;font-weight:700;background:linear-gradient(135deg,var(--gold-light),var(--gold-deep));
+  padding:7px 16px;border-radius:100px;box-shadow:0 8px 20px -8px rgba(201,162,74,.5);
 }
 
 /* ---------- cards / panels ---------- */
@@ -261,6 +280,12 @@ textarea{resize:vertical;min-height:90px;line-height:1.5;}
     <h1>Sua empresa está perdendo clientes por falta de <span class="accent">inovação</span>?</h1>
     <p class="sub">Um agente de análise objetivo avalia sua empresa e entrega, em minutos, o score empresarial, as áreas de impacto imediato e um plano de ação de 30/60/90 dias.</p>
   </header>
+
+  <div class="start-divider">
+    <div class="line"></div>
+    <span>Comece sua análise aqui</span>
+    <div class="line right"></div>
+  </div>
 
   <!-- ============ FORM ============ -->
   <div class="panel" id="formPanel">
@@ -806,3 +831,4 @@ function writeWrapped(doc, text, x, y, maxWidth, lineHeight=5.2){
 </script>
 </body>
 </html>
+
